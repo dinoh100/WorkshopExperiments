@@ -1,0 +1,13 @@
+include:
+  - repo: gh:bluetext-io/bluetext
+  - modules/compression-api
+  - modules/config-manager
+  - modules/couchbase
+  - modules/compression-frontend
+tools:
+  default:
+    run:
+      - tool: "compression-api"
+      - tool: "config-manager"
+      - tool: "couchbase"
+      - tool: "compression-frontend"

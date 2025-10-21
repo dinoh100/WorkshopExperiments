@@ -1,0 +1,13 @@
+include:
+  - repo: gh:bluetext-io/bluetext
+  - modules/config-manager
+  - modules/couchbase
+  - modules/portfolio-api
+  - modules/portfolio-frontend
+tools:
+  default:
+    run:
+      - tool: "config-manager"
+      - tool: "couchbase"
+      - tool: "portfolio-api"
+      - tool: "portfolio-frontend"

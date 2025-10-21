@@ -1,0 +1,17 @@
+include:
+  - repo: gh:bluetext-io/bluetext
+  - modules/config-manager
+  - modules/couchbase
+  - modules/temporal
+  - modules/postgres
+  - modules/compression-api
+  - modules/compression-ui
+tools:
+  default:
+    run:
+      - tool: "couchbase"
+      - tool: "temporal"
+      - tool: "temporal-ui"
+      - tool: "postgres"
+      - tool: "compression-api"
+      - tool: "compression-ui"

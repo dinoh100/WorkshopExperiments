@@ -1,0 +1,77 @@
+tools:
+  compression-api:
+    info: "'Base' module for other modules in this file to build on."
+    params:
+      - id: cmd
+        info: The command to run
+        type: [default, str, ./bin/run]
+      - id: dev-mode
+        info: Whether to run in dev mode (with hot reload, debugging)
+        type: [default, bool, true]
+      - id: port
+        info: The port the API will run on
+        type: [default, int, 3030]
+      - id: restart-policy
+        info: Restart policy for the container.
+        type: [default, [enum, always, never, on-failure], always]
+      - id: id
+        info: The container ID to use.
+        type: [default, str, compression-api]
+      - id: create
+        info: Whether to create the container.
+        type: [default, [enum, never, always, when-missing], when-missing]
+    run:
+      - tool: polytope/python
+        args:
+          id: pt.param id
+          image: astral/uv:python3.13-bookworm-slim
+          code: { type: repo, path: . }
+          cmd: pt.param cmd
+          restart:
+            policy: pt.param restart-policy
+          services: |-
+            #pt-js
+            params.cmd === "./bin/run"
+              ? [{ id: "compression-api", ports: [{ protocol: "http", port: params.port, 'expose-as': params.port }] }]
+              : null;
+          env:
+            - { name: HTTP_EXPOSE_ERRORS, value: pt.param dev-mode }
+            - { name: HTTP_AUTORELOAD, value: pt.param dev-mode }
+            - { name: HTTP_PORT, value: pt.param port }
+            - { name: LOG_LEVEL, value: INFO }
+
+            - { name: POSTGRES_HOST, value: postgres }
+
+            - { name: TEMPORAL_HOST, value: temporal }
+            - { name: TEMPORAL_PORT, value: 7233 }
+            - { name: TEMPORAL_NAMESPACE, value: default }
+            - { name: TEMPORAL_TASK_QUEUE, value: main-task-queue }
+          mounts:
+            - { path: /root/.cache/, source: { type: volume, scope: project, id: compression-api-dependency-cache } }
+  compression-api-add:
+    info: Adds one or more packages to the pyproject.toml file.
+    params:
+      - id: packages
+        info: comma/whitespace-separated list of python packages to add to pyproject.toml
+        type: str
+    run:
+      - tool: compression-api
+        args:
+          id: compression-api-add
+          restart-policy: on-failure
+          cmd: '#pt-js "uv add --no-progress " + params.packages.replace(/[\s,]+/g, " ")'
+          create: always
+
+  compression-api-add-couchbase-collection:
+    info: Scaffold a new Python script and add it to pyproject.toml. Run this to create test scripts for your agents!
+    params:
+      - id: name
+        info: Scaffolds a new Couchbase collection with CRUD operations, Pydantic models, and automatic integration.
+        type: str
+    run:
+      - tool: compression-api
+        args:
+          id: compression-api-add-couchbase-collection
+          restart-policy: never
+          cmd: ./bin/add-couchbase-collection {pt.param name}
+          create: always

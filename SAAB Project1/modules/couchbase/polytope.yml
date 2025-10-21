@@ -1,0 +1,8 @@
+tools:
+  couchbase:
+    info: "Runs the Couchbase cluster"
+    run:
+      - tool: polytope/couchbase
+        args:
+          image: couchbase:enterprise-7.6.6
+          data-volume: { id: couchbase-data, type: volume, scope: project }
